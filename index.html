@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Hash Table Collision Lab</title>
+    <title>How Hash Tables Work</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -15,11 +15,7 @@
   <body>
     <div class="grain" aria-hidden="true"></div>
     <header class="mast">
-      <div class="mast-meta">
-        <p class="eyebrow">CprE / SE 421 · Module 5 · AC Time</p>
-        <p class="rule-tag">One concept: hash-table collisions</p>
-      </div>
-      <h1>Hash Table Collision Lab</h1>
+      <h1>How Hash Tables Work</h1>
     </header>
 
     <main class="lab">
@@ -33,7 +29,7 @@
         <div id="lessonBody" class="lesson-body"></div>
         <div class="lesson-do">
           <p class="lesson-do-label">What you will do</p>
-          <p id="lessonDo"></p>
+          <div id="lessonDo" class="lesson-do-text"></div>
         </div>
         <p id="lessonSaw" class="lesson-saw" hidden></p>
         <div class="lesson-nav">
@@ -97,10 +93,6 @@
             />
             <button id="lookupBtn" type="button">Look up</button>
           </div>
-          <div class="lookup-hints">
-            <button type="button" class="text-btn" data-fill="Maya">Maya</button>
-            <button type="button" class="text-btn" data-fill="Alex">Alex</button>
-          </div>
         </div>
 
         <div class="btn-row" data-show="step">
@@ -114,11 +106,7 @@
           <h2 id="stage-title">Usernames already taken</h2>
           <p id="tableMeta" class="table-meta"></p>
         </div>
-        <p class="stage-caption" data-show="inside">
-          These lockers hold usernames the site already has, like Maya and Alex.
-          Top letter: which locker. Bottom number: how many names are inside.
-          Click a locker to open it.
-        </p>
+        <p id="stageCaption" class="stage-caption" data-show="inside"></p>
         <div id="bucketStrip" class="bucket-strip" role="list"></div>
         <div class="hot" data-show="inside">
           <div class="hot-head">
@@ -162,9 +150,8 @@
 
     <footer class="foot">
       <p>
-        Thresholds follow Module 5 / Chapter 6, not a quieter OpenJDK detail.
-        This page simulates a hash table. It does not generate payloads against
-        a real language runtime.
+        This page simulates a hash table, including attack keys and Java-style
+        tree mode. It does not attack a real runtime.
       </p>
     </footer>
 

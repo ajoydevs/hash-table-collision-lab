@@ -243,8 +243,16 @@ code {
   color: var(--amber);
 }
 
-.lesson-do #lessonDo {
+.lesson-do-text {
   margin: 0;
+}
+
+.lesson-do-text p {
+  margin: 0 0 0.4rem;
+}
+
+.lesson-do-text p:last-child {
+  margin-bottom: 0;
 }
 
 .lesson-saw {
@@ -258,6 +266,11 @@ code {
   flex-wrap: wrap;
   gap: 0.45rem;
   margin-top: 0.75rem;
+}
+
+.lesson-nav button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .field.teach-target,

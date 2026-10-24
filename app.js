@@ -17,6 +17,7 @@
   const stepBtn = $("stepBtn");
   const rebuildBtn = $("rebuildBtn");
   const bucketStrip = $("bucketStrip");
+  const stageCaption = $("stageCaption");
   const tableMeta = $("tableMeta");
   const hotTitle = $("hotTitle");
   const hotKind = $("hotKind");
@@ -69,42 +70,30 @@
       show: ["table", "inside"],
     },
     {
-      ask: "Those usernames are keys",
+      ask: "Keys and buckets",
       body: [
-        "The site already has a list of taken usernames: Maya, Alex, Sam, Riya, and a few more. Each stored username is called a key. Maya is a key. So is Alex.",
-        "The slider on the left is how many taken usernames are in the lockers right now. It is 8. The number at the bottom of a square is how many of those names sit in that locker. Add the bottom numbers and you get 8.",
+        "In a hash table, each stored username is a key. Each square on the grid is a bucket—a slot where keys sit. A hash function runs an algorithm on the username and uses that result to pick which bucket the key goes to.",
+        "The slider on the left is how many usernames are in the table right now (8).",
       ],
-      do: "Find Maya in a locker. She is one of the 8 taken usernames. Then click Next.",
+      do: [
+        "Step 1 used letters on each square so you could follow last-letter math. Here the squares use numbers (0, 1, 2, …)—that is how real hash tables label buckets.",
+        "On the grid to the right, on each square:",
+        "The top number is which bucket that square is.",
+        "The bottom number is how many keys are inside that bucket.",
+        "Click a square whose bottom number is greater than 0, read the usernames inside, then click Next.",
+      ],
       read: true,
       setup: START,
-      teach: "keyCount",
-      show: ["table", "inside", "keys"],
-    },
-    {
-      ask: "What is a bucket?",
-      body: [
-        "When the site checks Maya, it does not search every username. It sends her key to a locker. Each square in the grid is one of those lockers. In the textbook they are called buckets.",
-        "The small letter on top is the locker address. The number on the bottom is how many usernames already sit in that locker. A hash function is the math that turns a key into that locker letter.",
-      ],
-      do: "Click a square whose bottom number is greater than 0. That opens the locker so you can see the usernames inside.",
       teach: "buckets",
-      setup: START,
       show: ["table", "inside", "keys"],
-      check: (s) => s.lastBucketClick != null && s.hotLen > 0,
-      saw: (s) =>
-        "You clicked locker " +
-        lockerLabel(s.lastBucketClick) +
-        ". That letter is only its address — the hash sent these names here. Inside it you can see the " +
-        s.hotLen +
-        " username(s) sitting in that locker.",
     },
     {
       ask: "What is a collision?",
       body: [
-        "Sometimes two different usernames get the same locker letter. They are still two people. They just landed in the same locker. That is a collision.",
+        "Sometimes two different usernames hash to the same bucket number. They are still two people. They just landed in the same bucket. That is a collision.",
         "The site still has to look at each name and ask “is this Maya?” Those yes/no checks are comparisons. Every comparison is a little work for the processor.",
       ],
-      do: "Open a locker whose bottom number is 2 or more. Those usernames share one locker. That is a collision. Then click Next.",
+      do: "Open a bucket whose bottom number is 2 or more. Those keys share one bucket. That is a collision. Then click Next.",
       read: true,
       setup: START,
       teach: "buckets",
@@ -113,119 +102,79 @@
     {
       ask: "How does a lookup work?",
       body: [
-        "When the site checks Maya, it does not search every locker. It turns Maya into a locker letter (A), opens that locker, and walks the usernames inside it.",
-        "If the line is short, this is cheap. People write that as O(1): about the same cost even if the site has many users — as long as names spread across lockers.",
+        "When the site checks a username, it does not search every bucket. It runs the hash function, opens that bucket number, and walks the names inside until it finds a match or reaches the end.",
+        "The table holds eight names—Maya, Alex, Sam, Riya, …—each lands in a bucket from the hash unless two names collide.",
+        "Usernames are case-sensitive—Maya and maya are different keys.",
+        "If the line is short, this is cheap. People write that as O(1): about the same cost even if the site has many users, as long as names spread across buckets.",
       ],
-      do: "Click Maya. Watch the highlight walk the line. Read Comparisons.",
+      do: "Enter Maya, Alex, Sam, Riya, … and click Look up. Watch the highlight walk that bucket, then read Comparisons.",
+      read: true,
       teach: "lookup",
       setup: START,
       show: ["table", "inside", "keys", "lookup", "cost"],
-      check: (s) => s.lastLookup && s.lastLookup.key === "Maya" && s.lastLookup.found,
-      saw: (s) =>
-        "The site checked " +
-        s.lastLookup.steps +
-        " username(s) and stopped. That is the cheap case: Maya was easy to find.",
     },
     {
-      ask: "Same locker, different name",
+      ask: "Same bucket, different name",
       body: [
-        "Now check Alex. If Alex shares Maya’s locker, the walk has to pass Maya first. If Alex is in a different locker, the site opens that locker instead. Either way, a comparison is one “is this the name?” check.",
+        "Jordan and Chen are two different usernames, but the hash function sends both to the same bucket (bucket 20 on this table). That is a collision: same bucket, not the same person.",
+        "Inside that bucket the names sit in a line, in the order they were stored—Jordan first, then Chen. A lookup only opens this one bucket; it does not scan the rest of the table.",
+        "Look up Jordan: one comparison, a match on the first name. Look up Chen: the walk asks about Jordan first, then Chen—two comparisons. Each ask is one comparison.",
       ],
-      do: "Click Alex. Count Comparisons again.",
+      do: "Look up Jordan, then Chen. Watch Comparisons show 1, then 2, and open bucket 20 on the grid to see the line order.",
+      read: true,
       teach: "lookup",
+      setup: START,
       show: ["table", "inside", "keys", "lookup", "cost"],
-      check: (s) => s.lastLookup && s.lastLookup.key === "Alex" && s.lastLookup.found,
-      saw: (s) =>
-        "Now it checked " +
-        s.lastLookup.steps +
-        " names. A collision is a shared locker, not a shared identity.",
     },
     {
-      ask: "What if every key gets the same locker?",
+      ask: "What if every key lands in one bucket?",
       body: [
-        "An attacker can invent names that all hash to one letter. Then every key falls into one locker, and the other lockers sit empty.",
-        "More lockers do not help, because the locker letter never changes. The “fast” table becomes one long line.",
+        "An attacker can choose usernames so every one hashes to the same bucket. The table still has many bucket numbers, but every key piles into bucket 0 and the rest stay empty.",
+        "This page is now simulating that attack: every key is forced into a single bucket, the way colliding attack keys behave in a real hash-table DoS.",
+        "More buckets do not help—the hash always picks the same one. The fast table becomes one long line.",
       ],
-      do: "Open “How keys pick a bucket” and choose Attack keys (all the same bucket).",
-      teach: "hashMode",
-      setup: START,
-      show: ["table", "inside", "keys", "hash"],
-      review: { n: 8, collide: true, treeifyOn: false },
-      check: (s) => s.collide,
-      saw: () =>
-        "Look at the grid. One locker holds every key. The rest are 0. That pile is the attack.",
+      do: "Look at the grid. Bucket 0 should hold every username; every other bucket should show 0 on the bottom. Then click Next.",
+      read: true,
+      setup: { n: 8, collide: true, treeifyOn: false },
+      teach: "buckets",
+      show: ["table", "inside", "keys"],
     },
     {
       ask: "Why does the work explode?",
       body: [
-        "To add a new key, the table walks the whole line to see if the name is already there, then hangs it on the end.",
-        "The 1st key is free. The 2nd checks 1 name. The 3rd checks 2. The 40th checks 40. Add those up: 1+2+…+40 = 820 checks. In math that is about n² / 2. A short list of names, a lot of CPU. That is the time attack.",
+        "With every key in bucket 0, each new insert walks the whole line to see if the name is already there, then adds it at the end.",
+        "Insert 1 is cheap. Insert 2 compares once. Insert 40 compares 40 times. Add that up and the total work shoots up—about n² / 2 comparisons for n attack keys. That is the time attack on a line.",
       ],
-      do: "Drag “How many keys” to 40. Watch Comparisons, Longest bucket, and the chart.",
-      teach: "keyCount",
-      show: ["table", "inside", "keys", "hash", "cost", "chart"],
-      review: { n: 40, collide: true, treeifyOn: false },
-      check: (s) => s.collide && s.n >= 40,
-      saw: (s) =>
-        "The last insert checked " +
-        s.lastSteps +
-        " names. The longest locker holds " +
-        s.hotLen +
-        ". Total checks so far: " +
-        s.cumulative +
-        ". The chart hooks up because each new key is more expensive than the last.",
+      do: "This step simulates 40 attack keys in bucket 0 as a line (tree mode off). Read Comparisons, Longest bucket, and the chart—each new key costs more than the last.",
+      read: true,
+      teach: "buckets",
+      show: ["table", "inside", "keys", "cost", "chart"],
+      setup: { n: 40, collide: true, treeifyOn: false },
     },
     {
-      ask: "Did Java fix this?",
+      ask: "When does Java switch to a tree?",
       body: [
-        "After 2011, Java started turning a long locker-line into a tree, which you can search in fewer jumps.",
-        "The catch, from class: the tree appears only if that locker has more than 8 keys and the whole table has at least 64 keys. Miss either rule, and it stays a slow line.",
+        "After 2011, Java could reorganize a crowded bucket from a line into a tree—fewer jumps to reach a name instead of comparing every entry in order.",
+        "You will not always see a tree. In this simulation, with attack keys still piled in bucket 0 and Java’s tree mode on: if How many keys is below 64, bucket 0 stays a line; at 64 or more, bucket 0 becomes a tree. Same attack, different shape—because Java waits until the whole table is large enough before paying the cost to rebuild.",
+        "Why 64? Rebuilding into a tree is extra work. Java only does it once the whole table is big enough that the slow line is worth fixing. This page uses 64 as that cutoff.",
+        "Compare to the 40-key line step: the last insert there checked about 40 names in bucket 0, and Per-op cost was O(n). With the tree at 64 keys or more, inserts jump through bucket 0 instead of walking every name—Per-op cost becomes O(log n), and Comparisons on the last insert stays much smaller than the key count even at 80 keys.",
+        "Use the Cost panel: Comparisons is checks on the last operation; Per-op cost is O(n) on the line, O(log n) on the tree.",
       ],
-      do: "Turn on Tree (Java 8). Leave the key count under 64.",
-      teach: "treeify",
-      show: ["table", "inside", "keys", "hash", "treeify", "cost"],
-      setup: { n: 16, collide: true, treeifyOn: false },
-      review: { n: 16, collide: true, treeifyOn: true },
-      check: (s) =>
-        s.treeifyOn && s.n > 8 && s.n < 64 && s.hotKind === "list",
-      saw: (s) =>
-        "Still a line. The locker is crowded, but the table has only " +
-        s.n +
-        " keys. The second rule (64 in the table) is not met, so the defense is off.",
-    },
-    {
-      ask: "When does the tree actually appear?",
-      body: [
-        "Keep the tree switch on. You already have “more than 8 in one locker.” Now give the table 64 keys.",
+      do: [
+        "At 64 keys, open bucket 0 (tree). Read Cost—O(log n) and a small Comparisons count.",
+        "Drag How many keys to 40: bucket 0 is a line again, O(n). Drag to 64 or 80: tree and O(log n) return; at 80, Comparisons should still be far below 80.",
+        "Then click Next.",
       ],
-      do: "Drag “How many keys” to 64. Watch the line fold into a tree.",
+      read: true,
       teach: "keyCount",
-      show: ["table", "inside", "keys", "hash", "treeify", "cost", "chart"],
-      review: { n: 64, collide: true, treeifyOn: true },
-      check: (s) => s.treeifyOn && s.n >= 64 && s.hotKind === "tree",
-      saw: () =>
-        "Both class rules are true now, so the locker became a tree. Searching it should take a handful of jumps, not 64.",
-    },
-    {
-      ask: "Did the defense actually help?",
-      body: [
-        "If the tree works, adding even more colliding keys should not make the last insert walk 80 names.",
-      ],
-      do: "Drag “How many keys” to 80. Read Comparisons for that last insert.",
-      teach: "keyCount",
-      show: ["table", "inside", "keys", "hash", "treeify", "cost", "chart"],
-      review: { n: 80, collide: true, treeifyOn: true },
-      check: (s) => s.hotKind === "tree" && s.n >= 75 && s.lastSteps <= 10,
-      saw: (s) =>
-        "The last insert checked " +
-        s.lastSteps +
-        " names, not 80. Same attack keys, different shape inside the locker. The defense works — and it only started after 64.",
+      show: ["table", "inside", "keys", "cost", "chart"],
+      setup: { n: 64, collide: true, treeifyOn: true },
     },
     {
       ask: "Say it in plain words",
       body: [
-        "A hash table is a row of lockers. A hash is the locker letter. A collision is two names sharing a locker. A comparison is one “is this the name?” check.",
-        "Ordinary names spread out, so lookups stay cheap. Attack names all share one locker, so n inserts cost about n² / 2 checks, and the CPU dies. Java’s tree only appears after a locker has more than 8 names and the table has at least 64 names.",
+        "A hash table is a row of buckets. A hash is the bucket number. A collision is two names sharing a bucket. A comparison is one “is this the name?” check.",
+        "Ordinary names spread out, so lookups stay cheap. Attack names all share one bucket, so n inserts on a line cost about n² / 2 checks. With Java’s tree mode on, a crowded attack bucket stays a line (O(n) per op) until the table hits 64 keys, then becomes a tree (O(log n) per op); below 64 it is a line again.",
       ],
       do: "Use Back if any sentence is fuzzy.",
       read: true,
@@ -251,6 +200,10 @@
     return USERNAMES[i] || "user" + (i + 1);
   }
 
+  function useLetterLockers() {
+    return !exploring && lessonIndex === 0;
+  }
+
   function lockerLabel(i) {
     let n = i;
     let label = "";
@@ -261,10 +214,27 @@
     return label;
   }
 
+  function lockerAddress(i) {
+    return useLetterLockers() ? lockerLabel(i) : String(i);
+  }
+
   function lastLetterHash(str) {
     const last = str.charAt(str.length - 1).toLowerCase();
     if (last >= "a" && last <= "z") return last.charCodeAt(0) - 97;
     return last.charCodeAt(0);
+  }
+
+  function spreadHash(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+      h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+    }
+    return h;
+  }
+
+  function hashForKey(key) {
+    if (useLetterLockers()) return lastLetterHash(key);
+    return spreadHash(key);
   }
 
   function listKeys(bucket) {
@@ -320,7 +290,7 @@
   }
 
   function indexOf(tableState, key) {
-    const h = tableState.collide ? 0 : lastLetterHash(key);
+    const h = tableState.collide ? 0 : hashForKey(key);
     const cap = tableState.cap;
     return ((h % cap) + cap) % cap;
   }
@@ -533,16 +503,16 @@
       callout.hidden = false;
       callout.dataset.tone = "warn";
       callout.textContent =
-        "Treeify is blocked. This bucket has more than 8 keys, but the map has only " +
+        "Tree mode is on, but bucket 0 is still a line—the table has " +
         table.size +
-        " entries. Module 5 / Chapter 6 also require at least 64 entries.";
+        " keys. In this simulation, Java waits until the table reaches 64 keys before it replaces the line with a tree.";
       return;
     }
     if (grown) {
       callout.hidden = false;
       callout.dataset.tone = "good";
       callout.textContent =
-        "Both class thresholds are met: this bucket has more than 8 keys and the map has at least 64 entries. The bucket is a tree, so further walks are O(log n).";
+        "Bucket 0 is a tree now. Searches use a few jumps instead of walking every name in the line.";
       return;
     }
     if (collide && hot.kind === "list" && hot.length > 1) {
@@ -569,6 +539,17 @@
     return "O(n)";
   }
 
+  function renderStageCaption() {
+    if (!stageCaption) return;
+    if (useLetterLockers()) {
+      stageCaption.textContent =
+        "These lockers hold usernames the site already has, like Maya and Alex. Top letter: which locker (step 1 teaching labels). Bottom number: how many names are inside. Click a locker to open it.";
+      return;
+    }
+    stageCaption.textContent =
+      "Bucket numbers 0, 1, 2, … on each square. Click a square to open it.";
+  }
+
   function renderBuckets(landingIdx) {
     bucketStrip.replaceChildren();
     const maxLen = Math.max(1, ...table.bins.map((b) => b.length));
@@ -582,13 +563,13 @@
       if (i === landingIdx) btn.classList.add("landing");
       btn.innerHTML =
         '<span class="idx">' +
-        lockerLabel(i) +
+        lockerAddress(i) +
         '</span><span class="n">' +
         bucket.length +
         "</span>";
       btn.setAttribute(
         "aria-label",
-        "Locker " + lockerLabel(i) + ", " + bucket.length + " usernames"
+        "Bucket " + lockerAddress(i) + ", " + bucket.length + " usernames"
       );
       btn.addEventListener("click", () => {
         selectedBucket = i;
@@ -707,7 +688,9 @@
   function renderHot(highlight) {
     const bucket = table.bins[selectedBucket];
     const keys = bucketKeys(bucket);
-    hotTitle.textContent = "Usernames in locker " + lockerLabel(selectedBucket);
+    hotTitle.textContent =
+      (useLetterLockers() ? "Usernames in locker " : "Usernames in bucket ") +
+      lockerAddress(selectedBucket);
     hotKind.textContent =
       bucket.kind === "tree"
         ? keys.length + " usernames in a tree"
@@ -808,6 +791,7 @@
 
   function paint(op, steps, opts = {}) {
     keyCountOut.textContent = String(table.size);
+    renderStageCaption();
     renderBuckets(opts.landing ?? -1);
     renderHot(opts.highlight);
     drawChart();
@@ -878,6 +862,16 @@
     renderLesson();
   }
 
+  function setLessonDo(content) {
+    lessonDo.replaceChildren();
+    const lines = Array.isArray(content) ? content : [content];
+    lines.forEach((text) => {
+      const p = document.createElement("p");
+      p.textContent = text;
+      lessonDo.appendChild(p);
+    });
+  }
+
   function renderLesson() {
     const step = lessons[lessonIndex];
     const last = lessonIndex === lessons.length - 1;
@@ -899,9 +893,11 @@
       p.textContent = text;
       lessonBody.appendChild(p);
     });
-    lessonDo.textContent = exploring
-      ? "Look up a key in Attack mode, then switch back to Ordinary keys and look up the same key."
-      : step.do;
+    setLessonDo(
+      exploring
+        ? "Look up a key in Attack mode, then switch back to Ordinary keys and look up the same key."
+        : step.do
+    );
     lessonDots.replaceChildren();
     lessons.forEach((_, i) => {
       const li = document.createElement("li");
@@ -920,11 +916,17 @@
     });
     applyReveal(exploring ? null : step);
     highlightTeach(exploring ? null : step.teach);
+    renderStageCaption();
+    if (table) {
+      renderBuckets(-1);
+      renderHot();
+    }
     lessonBack.hidden = exploring || lessonIndex === 0;
     if (exploring) {
       lessonSaw.hidden = true;
       lessonNext.textContent = "Start lesson over";
       lessonNext.hidden = false;
+      lessonNext.disabled = false;
       return;
     }
     if (last && (lessonPassed || isReadStep(step))) {
@@ -936,6 +938,7 @@
       }
       lessonNext.textContent = "Start lesson over";
       lessonNext.hidden = false;
+      lessonNext.disabled = false;
       return;
     }
     if (lessonPassed) {
@@ -947,9 +950,19 @@
       }
       lessonNext.textContent = "Next";
       lessonNext.hidden = false;
+      lessonNext.disabled = false;
     } else {
-      lessonSaw.hidden = true;
-      lessonNext.hidden = true;
+      const state = lessonState();
+      if (step.check && state.lastLookup && !state.lastLookup.found) {
+        lessonSaw.hidden = false;
+        lessonSaw.textContent =
+          "That was a miss, so Next stays off. Names are case-sensitive—use Maya, not maya, and pick a name that is in the table.";
+      } else {
+        lessonSaw.hidden = true;
+      }
+      lessonNext.textContent = "Next";
+      lessonNext.hidden = false;
+      lessonNext.disabled = !!step.check;
     }
   }
 
@@ -964,6 +977,7 @@
   }
 
   function goNextLesson() {
+    if (lessonNext.disabled) return;
     if (exploring || lessonIndex === lessons.length - 1) {
       finishedSteps.clear();
       lastBucketClick = null;
@@ -1027,11 +1041,12 @@
 
   async function onLookup() {
     if (!table) return;
-    const key = lookupKey.value.trim();
-    if (!key) {
+    const raw = lookupKey.value.trim();
+    if (!raw) {
       lookupKey.focus();
       return;
     }
+    const key = raw;
     const result = lookupInTable(table, key);
     selectedBucket = result.index;
     renderBuckets(-1);
@@ -1095,12 +1110,6 @@
   lookupBtn.addEventListener("click", onLookup);
   lookupKey.addEventListener("keydown", (event) => {
     if (event.key === "Enter") onLookup();
-  });
-  document.querySelectorAll("[data-fill]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      lookupKey.value = btn.dataset.fill;
-      onLookup();
-    });
   });
   lessonNext.addEventListener("click", goNextLesson);
   lessonBack.addEventListener("click", goPrevLesson);

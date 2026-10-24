@@ -1,10 +1,12 @@
-# Hash Table Collision Lab
+# How Hash Tables Work
 
-A small static teaching page for **CprE / SE 421, Module 5**. It shows one idea from class: a hash table is cheap on ordinary keys, and becomes an **algorithmic-complexity time attack** when many keys share a hash.
+Static teaching lab for **CprE / SE 421, Module 5** (algorithmic-complexity time attacks). One concept: a hash table is cheap when keys spread across buckets, and becomes a **collision-driven complexity attack** when an attacker forces every key into the same bucket.
 
-Open `index.html` in a current browser. There is no server, no build step, and no API.
+## Run it
 
-Follow the **Lesson** card at the top. It starts from zero: what a key, a hash, a bucket, and a collision are, with the grid on the right as the picture. Later steps ask you to do one thing, then name the number you just produced. Use **Back** (or the step marks) to reread. **Next** stays put until you do the move.
+Open [`index.html`](index.html) in a current browser. No server, build step, or API.
+
+Use the **Lesson** card first. It walks from zero (checking whether a username like Maya is taken) through keys, buckets, collisions, lookups, attack mode, growing cost, and Java 8 treeify. The grid on the right is the picture. **Back** / **Next** and the step dots move through the lesson; extra controls unlock for free exploration at the end.
 
 ## What it teaches
 
@@ -13,44 +15,40 @@ In 2011, Java, PHP, and Python stored hash collisions in a linked list. Average 
 - each new insert walks a longer chain, **O(n)** per operation
 - *n* colliding inserts cost about **n² / 2** comparisons
 
-Collision is not identity. Maya, Riya, Priya, and Luca share locker A because they all end in *a*. They are still four different usernames. The site still compares them one by one.
+Collision is not identity. Two different usernames can share a bucket; the site still compares them one by one until it finds a match.
 
-Java 8 later turns a long bucket into a tree, but **only** when both Module 5 / Chapter 6 thresholds hold:
+Java 8 can turn a long bucket into a tree, but **only** when both Module 5 / Chapter 6 thresholds hold:
 
 1. that bucket has **more than 8** keys
 2. the map has **at least 64** entries
 
 Below either line, the bucket stays a list. This page follows those classroom thresholds.
 
-The lab **simulates** a hash table and counts comparisons. It does not time a real runtime or build payloads against one.
+The lab **simulates** a hash table and counts comparisons. It does not time a real runtime or attack a live service.
 
-## How to take the lesson
+## Controls (explore mode)
 
-1. Read what a hash table is (a row of lockers) and what a hash is (a locker letter).
-2. Click a square in the grid — that square is a bucket.
-3. Look up Maya, then Alex. Read **Comparisons**.
-4. Switch to *Attack keys*. Watch one locker eat every name.
-5. Drag the key count to 40, then try the Java 8 tree at 16 and at 64.
+During the lesson, only the controls needed for that step are emphasized. After the lesson, or when exploring:
 
-**Start lesson over** (at the end) puts you back at step 1. **Back** rereads an earlier step.
+- **How many keys** (slider, 1–80) — rebuilds the table; try 8, 40, 64, and 80
+- **Hashing** (dropdown) — spread keys vs all keys collide (same `hashCode()`)
+- **Java 8 tree mode** (toggle) — linked lists vs treeify when thresholds are met
+- **Look up a key** — highlight walks the chain or tree; **Comparisons** updates each step
+- **Step insert** / **Rebuild** — add the next key with motion, or refill from the slider
 
-## Controls
+The chart plots **counted insert comparisons**, not wall-clock time.
 
-Every control changes the picture. During the lesson, the next control is outlined.
+## Repository layout
 
-- **Keys to insert** (slider, 1–80) — rebuilds the table. Move it across 8 and 64.
-- **Hashing** (dropdown) — well-distributed keys vs all keys collide (Listing 6.2: every `hashCode()` is the same).
-- **Bucket structure** (toggle) — 2011 linked lists vs Java 8 treeify.
-- **Look up a key** (input + button) — a highlight walks the chain or tree; the comparison count ticks with each step. Try Maya, then Alex.
-- **Step insert** / **Rebuild** — drop in the next key with motion, or refill the table from the slider.
+| File | Role |
+|------|------|
+| `index.html` | Page structure and copy |
+| `styles.css` | Layout and styling |
+| `app.js` | Lesson script, simulation, animations |
+| `reflection.md` | Team reflection on building and learning from the lab |
 
-The chart plots **counted insert comparisons**, not wall-clock time. Colliding lists bend toward n². Treeify levels off only after both thresholds.
+Do not commit API keys, tokens, or course lecture PDFs.
 
-## Files
+## Course context
 
-- `index.html` — page and copy
-- `styles.css` — layout
-- `app.js` — simulation, rendering, walk animation
-- `reflection.md` — fill this in before you submit
-
-Do not commit API keys, tokens, or the lecture PDFs.
+Built for Sprint 3: AI-assisted development of an interactive visualization that makes one hard idea from the algorithmic-complexity and side-channel module easier to understand. This repo focuses on **hash collision complexity (AC Time)** only.

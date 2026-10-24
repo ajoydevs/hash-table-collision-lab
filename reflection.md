@@ -1,23 +1,9 @@
 # Reflection
 
-Write this page yourself before you submit (about one page). The prompts below are only a scaffold. Delete them and replace them with your own sentences.
+Our team’s Sprint 3 project is a static browser lab, “How Hash Tables Work,” focused on algorithmic-complexity time attacks from Module 5 and Chapter 6. We chose hash-table collision denial of service because the lecture describes a clear gap between average-case behavior and what happens when an attacker controls key choice. Slides and the textbook explain the 2011 Java, PHP, and Python issue and Java 8’s mitigation, but the thresholds and the n-squared total work are easy to memorize without really believing them. We wanted a single interactive page that lets another student see buckets fill, watch comparison counts change, and connect that to why the attack mattered in practice.
 
-## What I understood better
+We built the lab with AI-assisted development in Cursor. The tool gave us a working simulation early: hashing, chained buckets, an attack mode, cumulative cost tracking, and tree-style buckets once the table reaches 64 entries. Sequencing and explaining those ideas for a beginner took more work on our side. We revised the guided lesson so it opens with a familiar scenario (checking whether the username Maya is taken), introduces keys and buckets after that story, and moves from normal spreading to a deliberate pile-up in one bucket. We reviewed each step in the browser, cut redundant copy, and fixed cases where the animation did not match the text. Repeating that cycle—update the page, run through the lesson, discuss what was unclear, revise again—is where most of our time went.
 
-- Before this lab, what did “hash table is O(1)” mean to you?
-- What changed when you watched colliding keys walk one linked list?
-- What did the Java 8 rule actually require? Did the “map still under 64 entries” callout surprise you?
+Using the finished lab changed our understanding more than rereading the slides. Hash tables were described in earlier courses as “constant time on average,” and we had treated that as a fixed property of the data structure. The lab made us state the assumption: keys must hash to many different buckets so each chain stays short. The locker analogy and the numbered grid clarified that a collision is two different usernames sharing one bucket, not duplicate storage. Lookup practice, including two names in the same bucket with different comparison counts, showed that even a well-spread table still pays for equality checks inside a bucket. The attack simulation carried the security argument. When every key is routed to the same bucket, widening the table does not help; work per insert grows with chain length, and total insert work grows much faster than linearly, in line with the module’s complexity-time framing. Java 8’s treeify rule was easier to internalize once we could see it: a crowded bucket does not become a tree until the whole map is large enough that rebuilding is worth the cost. Adjusting the key count and reading the cost panel showed O(n) cost on a long chain and O(log n) after treeify in a way we could verify on the screen.
 
-## What the app showed me
-
-- Same *n*, two hash modes: what did the cost chart do in each case?
-- Why do `FB` and `Ea` share a bucket but still take two comparisons to tell apart?
-- Why does adding buckets fail when every `hashCode()` is the same?
-
-## How I built it
-
-- What did you ask the AI to do, and what did you change by hand?
-- Which control did you use first when you checked your own understanding (slider, dropdown, toggle, lookup, step)?
-- What did you verify in the browser before you called the page done?
-
-Keep secrets out of this file. Do not paste API keys, tokens, or private personal information.
+The app is static (`index.html`, `styles.css`, `app.js`) and runs by opening the file in a browser, with no server or build step. During review, one teammate walked through the lesson while others noted unclear wording or mismatched counts, and we folded that feedback into the next edits. The README describes the controls for free exploration after the lesson. The project showed us that fast code generation is only the starting point; the part that mattered for this course was checking that a new learner could follow the lesson and come away with the same idea Module 5 emphasizes about collision-driven complexity attacks.
